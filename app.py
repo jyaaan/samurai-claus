@@ -8,7 +8,7 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 
-# from database import db
+from server.clients.twilio_client import send_sms
 
 DEBUG_MODE = False
 
@@ -24,12 +24,17 @@ app.config['SQLALCHEMY_DATABASE_URI'] = uri
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 
-# from server.model import Member 
 import server.model
 
 @app.route('/')
 def index():
     return "Welcome to Samurai Claus Secret Santa! Normies!"
+
+@app.route('/test-sms')
+def test_sms():
+    result = send_sms('+17142935548', 'Hello, world!')
+    print('result', result)
+    return "Sent!"
 
 if __name__ == '__main__':
     app.run(debug=DEBUG_MODE)
