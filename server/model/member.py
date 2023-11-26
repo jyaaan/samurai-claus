@@ -6,6 +6,7 @@ from sqlalchemy import (
     Text,
     func,
 )
+from sqlalchemy.orm import relationship
 
 from factory import db
 
@@ -19,6 +20,8 @@ class Member(db.Model):
     email = Column(String(255), nullable=True, unique=True)
     phone = Column(Text, nullable=False, unique=True)
     address = Column(Text, nullable=True)
+
+    sequences = relationship('Sequence', backref='member')
 
     created = Column(DateTime, default=func.current_timestamp())
     created_ts = Column(

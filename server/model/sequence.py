@@ -9,7 +9,6 @@ from sqlalchemy import (
     Text,
     func,
 )
-from sqlalchemy.orm import relationship
 from factory import db
 from ..constants import SequenceStageEnum
 
@@ -25,7 +24,6 @@ class Sequence(db.Model):
         unique=False,
         index=True,
     )
-    member = relationship('Member', back_populates='sequence')
 
     season = Column(String(4), nullable=False)  # YYYY
     stage = Column(Enum(SequenceStageEnum), nullable=False)
