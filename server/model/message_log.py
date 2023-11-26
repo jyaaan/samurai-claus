@@ -6,18 +6,27 @@ from sqlalchemy import (
     Text,
     func,
 )
+from sqlalchemy.schema import ForeignKey
 
 from factory import db
 
-
-class Member(db.Model):
-    __tablename__ = 'member'
+class MessageLog(db.Model):
+    __tablename__ = 'message_log'
 
     id = Column(Integer, primary_key=True)
 
-    name = Column(String(255), nullable=False)
-    email = Column(String(255), nullable=True, unique=True)
-    phone = Column(Text, nullable=False, unique=True)
+    member_id = Column(
+        Integer,
+        ForeignKey('member.id'),
+        nullable=False,
+        unique=False,
+        index=True,
+    )
+
+    message_sid = Column(String(255), nullable=False, unique=True)
+    message_body = Column(String(255), nullable=True)
+    to_number = Column(String(255), nullable=False)
+    from_number = Column(Text, nullable=False)
 
     created = Column(DateTime, default=func.current_timestamp())
     created_ts = Column(
