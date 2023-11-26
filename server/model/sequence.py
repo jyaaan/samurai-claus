@@ -7,6 +7,7 @@ from sqlalchemy import (
     ForeignKey,
     Boolean,
     Text,
+    UniqueConstraint,
     func,
 )
 from factory import db
@@ -29,6 +30,7 @@ class Sequence(db.Model):
     stage = Column(Enum(SequenceStageEnum), nullable=False)
 
     conversation_summary = Column(Text, nullable=True)
+    conversation_history = Column(Text, nullable=True)
     enabled = Column(Boolean, default=True)
 
     created = Column(DateTime, default=func.current_timestamp())
@@ -45,6 +47,14 @@ class Sequence(db.Model):
         Integer,
         default=func.date_part('epoch', func.now()),
         onupdate=func.date_part('epoch', func.now()),
+    )
+
+    __table_args__ = (
+        UniqueConstraint(
+            'member_id',
+            'season',
+            name='member_id_season_unique_idx'
+        ),
     )
 
     def __init__(self, member_id, season, stage=SequenceStageEnum.Initialized, conversation_summary=None, enabled=True):
