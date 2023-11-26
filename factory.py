@@ -2,7 +2,6 @@ from dotenv import load_dotenv
 load_dotenv()
 
 import os
-import re
 
 from flask import Flask, request, Response
 from flask_sqlalchemy import SQLAlchemy
@@ -11,7 +10,6 @@ from flask_migrate import Migrate
 # Initialize db and migrate outside of create_app
 db = SQLAlchemy()
 migrate = None
-DEBUG_MODE = False
 
 def create_app():
     app = Flask(__name__)
@@ -30,7 +28,6 @@ def create_app():
     # Import models
     import server.model
 
-    # Import and register Blueprints here (if any)
 
     # Define routes
     @app.route('/')
@@ -39,9 +36,15 @@ def create_app():
 
     @app.route('/test-sms')
     def test_sms():
-        messaging_client = MessagingClient()
-        result = messaging_client.send_sms('+17142935548', 'Hello, world!', 1)
-        print('result', result)  # this is message sid
+        # messaging_client = MessagingClient()
+        # result = messaging_client.send_sms('+17142935548', 'Hello, world!', 1)
+        # print('result', result)  # this is message sid
+        from server.message_queue_handler import MessageQueueHandler
+        MessageQueueHandler.enqueue_outbound_message(
+            to_number='+17142935548',
+            body='Hello, world!',
+            member_id=1
+        )
         return "Sent!"
 
     @app.route('/sms', methods=['POST'])
@@ -55,13 +58,20 @@ def create_app():
         print('message_sid', message_sid)
         print('to_number', to_number)
 
-        messaging_client = MessagingClient()
-        messaging_client.receive_sms(
-            body=body,
+        # messaging_client = MessagingClient()
+        # messaging_client.receive_sms(
+        #     body=body,
+        #     from_number=from_number,
+        #     to_number=to_number,
+        #     message_sid=message_sid,
+        #     member_id=1
+        # )
+        from server.message_queue_handler import MessageQueueHandler
+        MessageQueueHandler.enqueue_received_message(
             from_number=from_number,
             to_number=to_number,
+            body=body,
             message_sid=message_sid,
-            member_id=1
         )
         return Response("Message received", 200)
 

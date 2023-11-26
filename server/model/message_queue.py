@@ -1,33 +1,40 @@
 from sqlalchemy import (
     Column,
     DateTime,
+    Enum,
     Integer,
     String,
     Text,
+    Boolean,
+    ForeignKey,
     func,
 )
-from sqlalchemy.schema import ForeignKey
 from sqlalchemy.orm import relationship
-
 from factory import db
 
-class MessageLog(db.Model):
-    __tablename__ = 'message_log'
+from ..constants import MessageQueueStatusEnum
+
+class MessageQueue(db.Model):
+    __tablename__ = 'message_queue'
 
     id = Column(Integer, primary_key=True)
+
+    direction = Column(Enum('inbound', 'outbound', name='message_direction'), nullable=False)
+    from_number = Column(String(100), nullable=False)
+    to_number = Column(String(100), nullable=False)
+    message_body = Column(Text, nullable=False)
+    message_sid = Column(String(100), nullable=True)
+    status = Column(Enum(MessageQueueStatusEnum), nullable=False, default=MessageQueueStatusEnum.PENDING)
+    hold = Column(Boolean, default=False)
 
     member_id = Column(
         Integer,
         ForeignKey('member.id'),
-        nullable=False,
-        unique=False,
-        index=True,
+        nullable=True,
+        index=True
     )
 
-    message_sid = Column(String(255), nullable=False, unique=True)
-    message_body = Column(String(255), nullable=True)
-    to_number = Column(String(255), nullable=False)
-    from_number = Column(Text, nullable=False)
+    error_message = Column(Text, nullable=True)
 
     created = Column(DateTime, default=func.current_timestamp())
     created_ts = Column(
@@ -44,4 +51,3 @@ class MessageLog(db.Model):
         default=func.date_part('epoch', func.now()),
         onupdate=func.date_part('epoch', func.now()),
     )
-
