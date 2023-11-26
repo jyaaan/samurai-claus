@@ -23,34 +23,42 @@ class MessagingClient:
             body (str): The body of the message.
             member_id (int): The ID of the member sending the message.
         """
+        print('sending sms?')
         message = self.client.messages.create(
             to=to_number,
             from_=TWILIO_PHONE_NUMBER,
             body=body
         )
-
+        print('message status', message.status)
         # Log the sent message
         MessageLogClient.create_log(
             member_id=member_id,
             message_sid=message.sid,
             message_body=body,
             to_number=to_number,
-            from_number=TWILIO_PHONE_NUMBER
+            from_number=TWILIO_PHONE_NUMBER,
+            direction='outbound',
+            status=message.status,
         )
-        return message.sid
+        return message.status
 
     @staticmethod
     def receive_sms(body, from_number, to_number, message_sid, member_id):
         # Log the received message
         # Note: You need to determine how to get member_id for incoming messages
-        member_id = 1 # temp for now
 
         MessageLogClient.create_log(
             member_id=member_id,
             message_sid=message_sid,
             message_body=body,
             to_number=to_number,
-            from_number=from_number
+            from_number=from_number,
+            direction='inbound',
+            status='received',
         )
 
         return "Message received"
+
+    def get_message_status(self, message_sid):
+        message = self.client.messages.get(message_sid).fetch()
+        return message.status

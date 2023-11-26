@@ -3,8 +3,9 @@ from factory import db
 
 from sqlalchemy import func
 
-from server.model import MessageQueue, Member
+from server.model import MessageLog, MessageQueue, Member
 from server.constants import MessageQueueStatusEnum
+from server.clients.messaging_client import MessagingClient
 
 
 TWILIO_PHONE_NUMBER = os.environ.get('TWILIO_PHONE_NUMBER')
@@ -71,31 +72,83 @@ class MessageQueueHandler:
     @staticmethod
     def process_message_queue():
         """
-        Processes messages in the queue.
+        Processes pending messages in the queue.
         """
-        # Get messages that are pending or on hold
         messages = MessageQueue.query.filter(
             MessageQueue.status.in_([MessageQueueStatusEnum.PENDING])
         ).all()
 
+        # Initialize messaging client if there are outbound messages
+        messaging_client = None
+        if messages:
+            messaging_client = MessagingClient()
+
         for message in messages:
-            print(message)
             try:
+                # This effectively locks the row so we don't risk spamming the
+                # same message
+                message.status = MessageQueueStatusEnum.PROCESSING
+                db.session.commit()
+
                 if message.direction == 'outbound':
-                    # Process outbound message (e.g., send via Twilio)
-                    # Update message_sid and change status to SENT
-                    pass  # Replace with actual send logic
+                    print('outbound')
+                    send_status = messaging_client.send_sms(
+                        to_number=message.to_number,
+                        body=message.message_body,
+                        member_id=message.member_id,
+                    )
+                    message.status = MessageQueueStatusEnum.SENT
+                    print(send_status)
 
                 elif message.direction == 'inbound':
-                    # Process inbound message
-                    # Update status to PROCESSED or RECEIVED after processing
-                    pass  # Replace with actual processing logic
+                    print('inbound')
+                    messaging_client.receive_sms(
+                        body=message.message_body,
+                        from_number=message.from_number,
+                        to_number=message.to_number,
+                        message_sid=message.message_sid,
+                        member_id=1, # temporary
+                    )
+                    message.status = MessageQueueStatusEnum.RECEIVED
 
-                # Update the message's last_modified timestamp
-                message.last_modified = func.current_timestamp()
+                
 
             except Exception as e:
                 message.status = MessageQueueStatusEnum.ERROR
                 message.error_message = str(e)
 
             db.session.commit()
+
+    @staticmethod
+    def get_message_status():
+        pending_statuses = [
+            'queued',
+            'sending',
+            'sent',
+        ]
+        messages = (
+            db.session.query(MessageLog)
+            .filter(
+                MessageLog.status.in_(pending_statuses),
+                MessageLog.direction == 'outbound',
+            )
+            .all()
+        )
+    
+        messaging_client = None
+        if messages:
+            messaging_client = MessagingClient()
+        
+        for message in messages:
+            try:
+                current_status = messaging_client.get_message_status(message.message_sid)
+                if current_status != message.status:
+                    message.status = current_status
+                elif current_status == 'sent':
+                    message.status = 'not_received'
+                    message.error_message = 'Message was sent but not received after 2 cycles'
+            except Exception as e:
+                print(e)
+                message.status = 'error'
+                message.error_message = str(e)
+        db.session.commit()
