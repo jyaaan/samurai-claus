@@ -62,7 +62,8 @@ class MessageQueueHandler:
             to_number=to_number,
             message_body=body,
             member_id=member_id,
-            status=MessageQueueStatusEnum.HOLD  # Set to HOLD for manual review
+            # status=MessageQueueStatusEnum.HOLD  # Set to HOLD for manual review
+            status=MessageQueueStatusEnum.PENDING,
         )
         db.session.add(new_message)
         db.session.commit()

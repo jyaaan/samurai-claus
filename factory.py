@@ -6,6 +6,7 @@ import os
 from flask import Flask, request, Response
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
+from server.clients.openai_client import OpenAIClient
 
 # Initialize db and migrate outside of create_app
 db = SQLAlchemy()
@@ -75,6 +76,12 @@ def create_app():
         )
         return Response("Message received", 200)
 
+    # @app.route('/test-openai')
+    # def test_openai():
+    #     client = OpenAIClient()
+    #     response = client.get_models()
+    #     print(response)
+    #     return response
     return app
 
 # Import MessagingClient after creating the app factory
