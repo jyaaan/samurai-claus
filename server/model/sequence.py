@@ -1,21 +1,23 @@
 from sqlalchemy import (
     Column,
     DateTime,
+    Enum,
     Integer,
     String,
+    ForeignKey,
+    Boolean,
     Text,
     func,
 )
-from sqlalchemy.schema import ForeignKey
 from sqlalchemy.orm import relationship
-
 from factory import db
+from ..constants import SequenceStageEnum
 
-class MessageLog(db.Model):
-    __tablename__ = 'message_log'
+class Sequence(db.Model):
+    __tablename__ = 'sequence'
 
     id = Column(Integer, primary_key=True)
-
+    
     member_id = Column(
         Integer,
         ForeignKey('member.id'),
@@ -25,10 +27,11 @@ class MessageLog(db.Model):
     )
     member = relationship('Member', back_populates='sequence')
 
-    message_sid = Column(String(255), nullable=False, unique=True)
-    message_body = Column(String(255), nullable=True)
-    to_number = Column(String(255), nullable=False)
-    from_number = Column(Text, nullable=False)
+    season = Column(String(4), nullable=False)  # YYYY
+    stage = Column(Enum(SequenceStageEnum), nullable=False)
+
+    conversation_summary = Column(Text, nullable=True)
+    enabled = Column(Boolean, default=True)
 
     created = Column(DateTime, default=func.current_timestamp())
     created_ts = Column(
@@ -46,3 +49,9 @@ class MessageLog(db.Model):
         onupdate=func.date_part('epoch', func.now()),
     )
 
+    def __init__(self, member_id, season, stage=SequenceStageEnum.Initialized, conversation_summary=None, enabled=True):
+        self.member_id = member_id
+        self.season = season
+        self.stage = stage
+        self.conversation_summary = conversation_summary
+        self.enabled = enabled
