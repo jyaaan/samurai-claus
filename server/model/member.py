@@ -18,6 +18,7 @@ class Member(db.Model):
     name = Column(String(255), nullable=False)
     email = Column(String(255), nullable=True, unique=True)
     phone = Column(Text, nullable=False, unique=True)
+    address = Column(Text, nullable=True)
 
     created = Column(DateTime, default=func.current_timestamp())
     created_ts = Column(
