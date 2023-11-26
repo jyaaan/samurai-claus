@@ -1,6 +1,7 @@
 from sqlalchemy import (
     Column,
     DateTime,
+    Enum,
     Integer,
     String,
     Text,
@@ -28,6 +29,9 @@ class MessageLog(db.Model):
     message_body = Column(String(255), nullable=True)
     to_number = Column(String(255), nullable=False)
     from_number = Column(Text, nullable=False)
+    direction = Column(Enum('inbound', 'outbound', name='message_log_direction'), nullable=False)
+    status = Column(String(20), nullable=False)
+    error_message = Column(Text, nullable=True)
 
     created = Column(DateTime, default=func.current_timestamp())
     created_ts = Column(

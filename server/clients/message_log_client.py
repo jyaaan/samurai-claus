@@ -4,7 +4,7 @@ from server.model import MessageLog
 class MessageLogClient:
 
     @staticmethod
-    def create_log(member_id, message_sid, message_body, to_number, from_number):
+    def create_log(member_id, message_sid, message_body, to_number, from_number, direction, status=None):
         """
         Creates a log entry for a Twilio SMS message.
 
@@ -20,11 +20,13 @@ class MessageLogClient:
             message_sid=message_sid,
             message_body=message_body,
             to_number=to_number,
-            from_number=from_number
+            from_number=from_number,
+            direction=direction,
+            status=status,
         )
         try:
             db.session.add(new_log)
-            db.session.commit()
+            db.session.flush()
             return new_log
         except Exception as e:
             db.session.rollback()

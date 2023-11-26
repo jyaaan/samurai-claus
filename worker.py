@@ -9,6 +9,7 @@ scheduler = BlockingScheduler()
 @scheduler.scheduled_job('interval', minutes=1)
 def process_messages():
     with app.app_context():
+        MessageQueueHandler.get_message_status()
         MessageQueueHandler.process_message_queue()
 
 if __name__ == '__main__':
