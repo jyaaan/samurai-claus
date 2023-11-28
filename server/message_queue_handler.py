@@ -49,7 +49,7 @@ class MessageQueueHandler:
         return new_message.id
     
     @staticmethod
-    def enqueue_outbound_message(to_number, body, member_id=None):
+    def enqueue_outbound_message(to_number, body, attach_image=False, member_id=None):
         """
         Enqueues an outbound message into the message queue.
 
@@ -65,6 +65,7 @@ class MessageQueueHandler:
             member_id=member_id,
             # status=MessageQueueStatusEnum.HOLD  # Set to HOLD for manual review
             status=MessageQueueStatusEnum.PENDING,
+            attach_image=attach_image,
         )
         db.session.add(new_message)
         db.session.commit()
