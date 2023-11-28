@@ -26,6 +26,7 @@ class MessageQueue(db.Model):
     message_sid = Column(String(100), nullable=True)
     status = Column(Enum(MessageQueueStatusEnum), nullable=False, default=MessageQueueStatusEnum.PENDING)
     hold = Column(Boolean, default=False)
+    attach_image = Column(Boolean, default=False, nullable=False)
 
     member_id = Column(
         Integer,

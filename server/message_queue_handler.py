@@ -1,10 +1,11 @@
 import os
+import random
 from factory import db
 
 from sqlalchemy import func
 
 from server.model import MessageLog, MessageQueue, Member
-from server.constants import MessageQueueStatusEnum
+from server.constants import MessageQueueStatusEnum, samurai_claus_images
 from server.clients.messaging_client import MessagingClient
 
 
@@ -92,10 +93,15 @@ class MessageQueueHandler:
                 db.session.commit()
                 if message.direction == 'outbound':
                     print('outbound')
+                    random_image = None
+                    if message.attach_image:
+                        random_image = random.choice(samurai_claus_images)
+
                     send_status = messaging_client.send_sms(
                         to_number=message.to_number,
                         body=message.message_body,
                         member_id=message.member_id,
+                        media_url=random_image,
                     )
                     message.status = MessageQueueStatusEnum.SENT
                     print(send_status)

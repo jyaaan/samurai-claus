@@ -15,7 +15,7 @@ class MessagingClient:
     def __init__(self):
         self.client = TwilioClient(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN)
 
-    def send_sms(self, to_number, body, member_id):
+    def send_sms(self, to_number, body, member_id, media_url=None):
         """
         Send an SMS and log the message.
 
@@ -25,11 +25,16 @@ class MessagingClient:
             member_id (int): The ID of the member sending the message.
         """
         print('sending sms?')
-        message = self.client.messages.create(
-            to=to_number,
-            from_=TWILIO_PHONE_NUMBER,
-            body=body
-        )
+        message_args = {
+            'to': to_number,
+            'from_': TWILIO_PHONE_NUMBER,
+            'body': body
+        }
+
+        if media_url:
+            message_args['media_url'] = [media_url]
+
+        message = self.client.messages.create(**message_args)
         print('message status', message.status)
         # Log the sent message
         MessageLogClient.create_log(
