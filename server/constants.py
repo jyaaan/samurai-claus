@@ -26,3 +26,18 @@ class OpenAIMessageTypesEnum(enum.Enum):
     ADDRESS = "address"
     WIHSLIST = "wishlist"
     ERROR = "error"
+
+samurai_claus_images = [
+    'https://i.imgur.com/zfiMcvz.png',
+    'https://i.imgur.com/bdTPTvf.png',
+    'https://i.imgur.com/eHgw8hH.png',
+    'https://i.imgur.com/YvNNIw3.png',
+    'https://i.imgur.com/BRcodYS.png',
+    'https://i.imgur.com/5GhS4cP.png',
+    'https://i.imgur.com/6M5TiSB.png',
+    'https://i.imgur.com/znZchtP.png',
+    'https://i.imgur.com/5UC034y.png',
+    'https://i.imgur.com/ciCsYeJ.png',
+    'https://i.imgur.com/adwxlAu.png',
+    'https://i.imgur.com/y0VZZci.png',
+]
