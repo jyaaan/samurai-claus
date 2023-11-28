@@ -4,7 +4,7 @@ import openai
 from factory import db
 
 from server.openai_utils import get_samurai_claus_profile
-from server.model import GPTPromptInstruction, Member
+from server.model import GPTPromptInstruction, Member, MessageLog
 from server.constants import OpenAIMessageTypesEnum
 
 OPENAI_API_KEY = os.environ.get('OPENAI_API_KEY')
@@ -99,6 +99,10 @@ class OpenAIClient:
             "role": "system", 
             "content": get_samurai_claus_profile(member_name),
         })
+
+        chat_history = self._generate_chat_history(member_id)
+
+        conversation_history.extend(chat_history)
         if message_type == OpenAIMessageTypesEnum.CHAT:
             conversation_history.append({"role": "user", "content": user_message})
         else:
@@ -129,6 +133,32 @@ class OpenAIClient:
         except Exception as e:
             print(f"Error in chat_with_samurai_claus: {e}")
             return None
+        
+    def _generate_chat_history(self, member_id):
+        # this will read all past delivered messages between samurai claus
+        # and the member specified
+        valid_statuses = [
+            'delivered',
+            'sent',
+            'received',
+        ]
+        message_history = (
+            db.session.query(MessageLog)
+            .filter(
+                MessageLog.member_id == member_id,
+                MessageLog.status.in_(valid_statuses)
+            )
+            .order_by(MessageLog.created_ts)
+            .all()
+        )
+        conversation_history = []
+        for message in message_history:
+            if message.direction == 'inbound':
+                conversation_history.append({"role": "user", "content": message.message_body})
+            else:
+                conversation_history.append({"role": "assistant", "content": message.message_body})
+        
+        return conversation_history
 
 # Usage example:
 # client = OpenAIClient()
