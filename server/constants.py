@@ -20,3 +20,9 @@ class MessageQueueStatusEnum(enum.Enum):
     RECEIVED = "received"
     HOLD = "hold"
     ERROR = "error"
+
+class OpenAIMessageTypesEnum(enum.Enum):
+    CHAT = "chat"
+    ADDRESS = "address"
+    WIHSLIST = "wishlist"
+    ERROR = "error"

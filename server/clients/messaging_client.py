@@ -2,9 +2,9 @@ import os
 
 from twilio.rest import Client as TwilioClient
 from server.clients.openai_client import OpenAIClient
-from flask import request
 
 from .message_log_client import MessageLogClient
+from server.constants import OpenAIMessageTypesEnum
 
 TWILIO_ACCOUNT_SID = os.environ.get('TWILIO_ACCOUNT_SID')
 TWILIO_AUTH_TOKEN = os.environ.get('TWILIO_AUTH_TOKEN')
@@ -46,9 +46,7 @@ class MessagingClient:
     @staticmethod
     def receive_sms(body, from_number, to_number, message_sid, member_id):
         # Log the received message
-        # Note: You need to determine how to get member_id for incoming messages
         openai_client = OpenAIClient()
-        # from server.message_queue_handler import MessageQueueHandler
         MessageLogClient.create_log(
             member_id=member_id,
             message_sid=message_sid,
@@ -62,8 +60,8 @@ class MessagingClient:
             user_message=body,
             to_number=from_number,
             member_id=member_id,
+            message_type=OpenAIMessageTypesEnum.CHAT,
         )
-        
         
         return "Message received"
 

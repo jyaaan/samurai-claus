@@ -90,7 +90,6 @@ class MessageQueueHandler:
                 # same message
                 message.status = MessageQueueStatusEnum.PROCESSING
                 db.session.commit()
-
                 if message.direction == 'outbound':
                     print('outbound')
                     send_status = messaging_client.send_sms(
@@ -103,16 +102,22 @@ class MessageQueueHandler:
 
                 elif message.direction == 'inbound':
                     print('inbound')
+                    member = (
+                        db.session.query(Member)
+                        .filter(Member.phone == message.from_number)
+                        .one_or_none()
+                    )
+                    if not member:
+                        raise Exception(f"Member not found for phone number {message.from_number}")
+
                     messaging_client.receive_sms(
                         body=message.message_body,
                         from_number=message.from_number,
                         to_number=message.to_number,
                         message_sid=message.message_sid,
-                        member_id=1, # temporary
+                        member_id=member.id,
                     )
                     message.status = MessageQueueStatusEnum.RECEIVED
-
-                
 
             except Exception as e:
                 message.status = MessageQueueStatusEnum.ERROR
