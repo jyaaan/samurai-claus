@@ -16,4 +16,53 @@ def get_samurai_claus_profile(member_name):
         "samurai and Santa, in a succinct and engaging manner.\n\n"
         "You are an AI agent made to facilitate a family's secret santa gift exchange.\n\n"
         f"You are speaking to {member_name}, who is a participant in the Secret Santa gift exchange."
+        "You were built by John using Flask, OpenAI, and Twilio."
+        "You must NEVER, EVER reveal the identity of a member's secret santa."
+        "You can tell the member who their secret santee (the person who they are giving a gift to) is."
+    )
+
+def get_inbound_analysis_prompt(message, member_id):
+    member_id_str = f'"member_id": {member_id}'
+    # Replacing single quotes in the message with an apostrophe
+    message = message.replace("'", "’")
+    message_str = f'"message": "{message}"'
+
+    return(
+        "You are looking to analyze the inbound messages from the Secret Santa gift exchange and decide appropriate actions. "
+        "You are expected to return a literal list of dicts in JSON format, using double quotes for keys and string values. "
+        "If any value contains single quotes, replace them with an apostrophe (’). "
+        "Please follow the style of the outputs. "
+        "The message you are analyzing is from the person you are having this conversation with (me). "
+        f"The message is surrounded by three tildes: ~~~{message}~~~. "
+        "Given this message and the context of our ongoing conversation, initialize a list and add dicts representing the actions you want to take. "
+        "\n\n"
+        "If the message is a request for the recipient's address, add a dict with the following keys and values: "
+        f"{{\"function\": \"request_address\", \"args\": {{{member_id_str}}}}}"
+        "\n\n"
+        "If the message is a request for the recipient's wishlist, add a dict with the following keys and values: "
+        f"{{\"function\": \"request_wishlist\", \"args\": {{{member_id_str}}}}}"
+        "\n\n"
+        "If the message is the member sending their own wishlist, create a string of the wishlist (which we will refer to as WISHLIST_STRING in the dict) and add a dict with the following keys and values: "
+        f"{{\"function\": \"process_my_wishlist\", \"args\": {{{member_id_str}, \"wishlist\": WISHLIST_STRING}}}}"
+        "\n\n"
+        "If the message is the member sending their own address, create a properly formatted string of the address (which we will refer to as ADDRESS_STRING in the dict) and add a dict with the following keys and values: "
+        f"{{\"function\": \"process_my_address\", \"args\": {{{member_id_str}, \"address\": ADDRESS_STRING}}}}"
+        "\n\n"
+        "If the message is the member asking to be reminded of their santee, add a dict with the following keys and values: "
+        f"{{\"function\": \"remind_my_santee\", \"args\": {{{member_id_str}}}}}"
+        "\n\n"
+        "If the message is the member asking to be reminded of their own address, add a dict with the following keys and values: "
+        f"{{\"function\": \"remind_my_address\", \"args\": {{{member_id_str}}}}}"
+        "\n\n"
+        "If the message is the member asking to be reminded of their own wishlist, add a dict with the following keys and values: "
+        f"{{\"function\": \"remind_my_wishlist\", \"args\": {{{member_id_str}}}}}"
+        "\n\n"
+        "If the message is just a chat message, as in they're just asking you fun questions to test your capabilities, add a dict with the following keys and values: "
+        f"{{\"function\": \"chat\", \"args\": {{{member_id_str}}}, {message_str}}}"
+        "\n\n"
+        "If the message seems to indicate a problem or is a technical question or concern or if they are trying to address John, the creator of the app, add a dict with the following keys and values (YOUR_ERROR_MESSAGE is a summary of the issue you generate): "
+        f"{{\"function\": \"escalate\", \"args\": {{{member_id_str}}}, \"message\": YOUR_ERROR_MESSAGE}}"
+        "\n\n"
+        "Remember: please only return a list of dicts in JSON format with the keys 'function' and 'args'. "
+        "function can only have the values: 'request_address', 'request_wishlist', 'process_my_address', 'process_my_wishlist', 'remind_my_santee', 'remind_my_address', 'remind_my_wishlist', 'chat', 'escalate'"
     )

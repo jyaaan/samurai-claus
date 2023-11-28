@@ -61,12 +61,18 @@ class MessagingClient:
             direction='inbound',
             status='received',
         )
-        openai_client.chat_with_samurai_claus(
-            user_message=body,
-            to_number=from_number,
+        openai_client.analyze_inbound_message(
             member_id=member_id,
-            message_type=OpenAIMessageTypesEnum.CHAT,
+            message_body=body,
+            to_number=to_number,
+            from_number=from_number,
         )
+        # openai_client.chat_with_samurai_claus(
+        #     user_message=body,
+        #     to_number=from_number,
+        #     member_id=member_id,
+        #     message_type=OpenAIMessageTypesEnum.CHAT,
+        # )
         
         return "Message received"
 
