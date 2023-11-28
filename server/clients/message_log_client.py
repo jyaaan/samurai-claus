@@ -29,6 +29,7 @@ class MessageLogClient:
             db.session.flush()
             return new_log
         except Exception as e:
+            print(e)
             db.session.rollback()
             # Handle or log the exception as needed
             raise e

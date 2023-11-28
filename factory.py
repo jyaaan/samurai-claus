@@ -6,7 +6,6 @@ import os
 from flask import Flask, request, Response
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
-from server.clients.openai_client import OpenAIClient
 
 # Initialize db and migrate outside of create_app
 db = SQLAlchemy()
@@ -37,9 +36,6 @@ def create_app():
 
     @app.route('/test-sms')
     def test_sms():
-        # messaging_client = MessagingClient()
-        # result = messaging_client.send_sms('+17142935548', 'Hello, world!', 1)
-        # print('result', result)  # this is message sid
         from server.message_queue_handler import MessageQueueHandler
         MessageQueueHandler.enqueue_outbound_message(
             to_number='+17142935548',
@@ -59,14 +55,6 @@ def create_app():
         print('message_sid', message_sid)
         print('to_number', to_number)
 
-        # messaging_client = MessagingClient()
-        # messaging_client.receive_sms(
-        #     body=body,
-        #     from_number=from_number,
-        #     to_number=to_number,
-        #     message_sid=message_sid,
-        #     member_id=1
-        # )
         from server.message_queue_handler import MessageQueueHandler
         MessageQueueHandler.enqueue_received_message(
             from_number=from_number,
@@ -76,12 +64,6 @@ def create_app():
         )
         return Response("Message received", 200)
 
-    # @app.route('/test-openai')
-    # def test_openai():
-    #     client = OpenAIClient()
-    #     response = client.get_models()
-    #     print(response)
-    #     return response
     return app
 
 # Import MessagingClient after creating the app factory
