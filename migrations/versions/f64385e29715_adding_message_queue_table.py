@@ -41,7 +41,7 @@ def upgrade():
         batch_op.create_index(batch_op.f('ix_message_queue_member_id'), ['member_id'], unique=False)
 
     with op.batch_alter_table('message_log', schema=None) as batch_op:
-        batch_op.drop_index('ix_message_log_sequence_id')
+        # batch_op.drop_index('ix_message_log_sequence_id')
         batch_op.drop_constraint('message_log_sequence_id_fkey', type_='foreignkey')
         batch_op.drop_column('sequence_id')
 
@@ -53,7 +53,7 @@ def downgrade():
     with op.batch_alter_table('message_log', schema=None) as batch_op:
         batch_op.add_column(sa.Column('sequence_id', sa.INTEGER(), autoincrement=False, nullable=True))
         batch_op.create_foreign_key('message_log_sequence_id_fkey', 'sequence', ['sequence_id'], ['id'])
-        batch_op.create_index('ix_message_log_sequence_id', ['sequence_id'], unique=False)
+        # batch_op.create_index('ix_message_log_sequence_id', ['sequence_id'], unique=False)
 
     with op.batch_alter_table('message_queue', schema=None) as batch_op:
         batch_op.drop_index(batch_op.f('ix_message_queue_member_id'))
