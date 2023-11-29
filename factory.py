@@ -68,9 +68,12 @@ def create_app():
     def create_member():
         from server.model import Member, Sequence, SeasonalPreference
         from server.constants import SequenceStageEnum
-        print('request.values', request.values)
-        member_name = request.values.get('member_name', None)
-        member_phone = request.values.get('member_phone', None)
+        print('request.json', request.json)
+        member_name = request.json.get('member_name', None)
+        print('member_name', member_name)
+        member_phone = request.json.get('member_phone', None)
+        print('member_phone', member_phone)
+
         try:
             new_member = Member(
                 name=member_name,
