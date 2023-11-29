@@ -300,7 +300,7 @@ class OpenAIClient:
                 elif function == 'process_my_address':
                     my_address = action['args']['address']
                     ai_db_client.write_my_address(member_id, my_address)
-                    address_confirmation = f"Please tell the participant you are speaking to (me) that their address has been updated to: {my_address}"
+                    address_confirmation = f"Please tell the participant you are speaking to (me) that their address has been updated to: {my_address}. Provide a fun fact of their city if you can find one."
                     self.chat_with_samurai_claus(
                         user_message=address_confirmation,
                         to_number=member.phone,
