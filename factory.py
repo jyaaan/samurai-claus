@@ -55,24 +55,25 @@ def create_app():
         print('message_sid', message_sid)
         print('to_number', to_number)
 
-        from server.message_queue_handler import MessageQueueHandler
-        MessageQueueHandler.enqueue_received_message(
-            from_number=from_number,
-            to_number=to_number,
-            body=body,
-            message_sid=message_sid,
-        )
+        # from server.message_queue_handler import MessageQueueHandler
+        # MessageQueueHandler.enqueue_received_message(
+        #     from_number=from_number,
+        #     to_number=to_number,
+        #     body=body,
+        #     message_sid=message_sid,
+        # )
         return Response("Message received", 200)
 
     @app.route('/create-member', methods=['POST'])
     def create_member():
         from server.model import Member, Sequence, SeasonalPreference
         from server.constants import SequenceStageEnum
-        print('request.values', request.values)
-        member_name = request.values.get('member_name', None)
+        print('request.json', request.json)
+        member_name = request.json.get('member_name', None)
         print('member_name', member_name)
-        member_phone = request.values.get('member_phone', None)
+        member_phone = request.json.get('member_phone', None)
         print('member_phone', member_phone)
+
         try:
             new_member = Member(
                 name=member_name,
