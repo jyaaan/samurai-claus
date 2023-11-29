@@ -5,8 +5,9 @@ from factory import db
 from sqlalchemy import func
 
 from server.model import MessageLog, MessageQueue, Member
-from server.constants import MessageQueueStatusEnum, samurai_claus_images
+from server.constants import MessageQueueStatusEnum, SequenceStageEnum, samurai_claus_images
 from server.clients.messaging_client import MessagingClient
+from server.openai_utils import get_welcome_message_prompt
 
 
 TWILIO_PHONE_NUMBER = os.environ.get('TWILIO_PHONE_NUMBER')
@@ -165,3 +166,39 @@ class MessageQueueHandler:
                 message.status = 'error'
                 message.error_message = str(e)
         db.session.commit()
+    
+    @staticmethod
+    def start_sequences():
+        from server.model import Member, Sequence, SeasonalPreference
+        from server.clients.openai_client import OpenAIClient
+        from server.clients.ai_database_client import AIDatabaseClient
+        try:
+            sequences = (
+                db.session.query(Sequence)
+                .filter(
+                    Sequence.enabled == True,
+                    Sequence.stage == SequenceStageEnum.Initialized,
+                )
+                .all()
+            )
+            if not sequences:
+                return
+            openai_client = OpenAIClient()
+            ai_database_client = AIDatabaseClient()
+            members = db.session.query(Member).all()
+            for sequence in sequences:
+                member = next((x for x in members if x.id == sequence.member_id), None)
+                secret_santee_name = ai_database_client.get_my_santee_name(member.id)
+                sequence.stage = SequenceStageEnum.Participant_Confirmation
+                db.session.commit()
+
+                openai_client.send_template_message(
+                    message=get_welcome_message_prompt(secret_santee_name),
+                    member_id=member.id,
+                    to_number=member.phone,
+                    attach_image=True,
+                )
+            db.session.commit()
+        except Exception as e:
+            db.session.rollback()
+            raise e

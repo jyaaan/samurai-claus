@@ -64,6 +64,51 @@ def create_app():
         )
         return Response("Message received", 200)
 
+    @app.route('/create-member', methods=['POST'])
+    def create_member():
+        from server.model import Member, Sequence, SeasonalPreference
+        from server.constants import SequenceStageEnum
+        print('request.values', request.values)
+        member_name = request.values.get('member_name', None)
+        member_phone = request.values.get('member_phone', None)
+        try:
+            new_member = Member(
+                name=member_name,
+                phone=member_phone,
+            )
+            db.session.add(new_member)
+            db.session.flush()
+            new_sequence = Sequence(
+                member_id=new_member.id,
+                season='2023',
+                enabled=False,
+                stage=SequenceStageEnum.Initialized,
+            )
+
+            db.session.add(new_sequence)
+            db.session.flush()
+            new_preference = SeasonalPreference(
+                member_id=new_member.id,
+                season='2023',
+            )
+            db.session.add(new_preference)
+            db.session.commit()
+        except Exception as e:
+            db.session.rollback()
+            raise e
+        return "Created!"
+
+    @app.route('/start-sequences')
+    def start_sequences():
+        from server.model import Sequence, SeasonalPreference
+        sequences = db.session.query(Sequence).all()
+        seasonal_preferences = db.session.query(SeasonalPreference).all()
+        for sequence in sequences:
+            seasonal_preference = next((x for x in seasonal_preferences if x.member_id == sequence.member_id), None)
+            if seasonal_preference.secret_santee_id:
+                sequence.enabled = True
+        db.session.commit()
+        return "Started!"
     return app
 
 # Import MessagingClient after creating the app factory

@@ -1,6 +1,7 @@
 import os
 import openai
 import json
+import time
 
 from factory import db
 
@@ -72,6 +73,15 @@ class OpenAIClient:
         samurai_response = chat_completion.choices[0].message.content
         return samurai_response
 
+    def send_template_message(self, message, to_number, member_id, attach_image=False):
+        from server.message_queue_handler import MessageQueueHandler
+        MessageQueueHandler.enqueue_outbound_message(
+            to_number=to_number,
+            body=message,
+            member_id=member_id,
+            attach_image=attach_image,
+        )
+
     def chat_with_samurai_claus(
             self,
             user_message,
@@ -92,6 +102,7 @@ class OpenAIClient:
         Returns:
             str: The latest response from Samurai Claus.
         """
+        print('user_message', user_message)
         member = (
             db.session.query(Member)
             .filter(Member.id == member_id)
@@ -118,16 +129,16 @@ class OpenAIClient:
         #     conversation_history.append({"role": "user", "content": prompt.prompt_template})
         try:
             chat_completion = openai.chat.completions.create(
-                model="gpt-4",
+                model="gpt-4-1106-preview",
                 messages=conversation_history
             )
-            print('raw chat_completion', chat_completion)
+            # print('raw chat_completion', chat_completion)
             # Extract the latest response from Samurai Claus
             samurai_response = chat_completion.choices[0].message.content
 
             # Add the response to the conversation history
             conversation_history.append({"role": "assistant", "content": samurai_response})
-            print('conversation_history', conversation_history)
+            # print('conversation_history', conversation_history)
             print('samurai_response', samurai_response)
             MessageQueueHandler.enqueue_outbound_message(
                 to_number=to_number,
@@ -186,11 +197,15 @@ class OpenAIClient:
         conversation_history.append({"role": "user", "content": get_inbound_analysis_prompt(message_body, member_id)})
         try:
             chat_completion = openai.chat.completions.create(
-                model="gpt-4",
-                messages=conversation_history
+                model="gpt-4-1106-preview",
+                messages=conversation_history,
             )
             actions = chat_completion.choices[0].message.content
-            actions = json.loads(actions)
+            actions = actions.replace('```json\n', '').replace('```', '').strip()
+            print('actions before loads', actions)
+            if actions:
+                actions = json.loads(actions)
+            print('actions', actions)
             for action in actions:
                 function = action['function']
                 if function == 'chat':
@@ -205,6 +220,7 @@ class OpenAIClient:
                         message_body=message_body,
                         error_message=action['message'],
                     )
+                    time.sleep(10)
                     escalastion_reply = "Please tell the participant you are speaking to (me) that their message has been escalated to the Samurai Claus team and they will be in touch shortly."
                     self.chat_with_samurai_claus(
                         user_message=escalastion_reply,
@@ -228,6 +244,7 @@ class OpenAIClient:
                             to_number=member.phone,
                             member_id=member_id,
                         )
+                        time.sleep(10)
                         santee_details = ai_db_client.get_my_santee_details(member_id)
                         address_reminder = "Please ask the participant you are speaking to (me) to provide their shipping address when they are able to.  Be polite."
                         self.chat_with_samurai_claus(
@@ -239,7 +256,7 @@ class OpenAIClient:
                 elif function == 'request_wishlist':
                     santee_wishlist = ai_db_client.get_santee_wishlist(member_id)
                     if santee_wishlist:
-                        wishlist_reply = f"Please tell the participant you are speaking to (me) that their Secret Santee's wishlist is: {santee_wishlist}"
+                        wishlist_reply = f"Please tell the participant you are speaking to (me) that their Secret Santee's wishlist is: {santee_wishlist}. Please don't modify the wishlist too much, as in don't be too whimsical here."
                         self.chat_with_samurai_claus(
                             user_message=wishlist_reply,
                             to_number=member.phone,
@@ -252,6 +269,7 @@ class OpenAIClient:
                             to_number=member.phone,
                             member_id=member_id,
                         )
+                        time.sleep(10)
                         santee_details = ai_db_client.get_my_santee_details(member_id)
                         wishlist_reminder = "Please remind the participant you are speaking to (me) to provide their wishlist items when they are able to. Be polite and encouraging."
                         self.chat_with_samurai_claus(
@@ -269,6 +287,15 @@ class OpenAIClient:
                         to_number=member.phone,
                         member_id=member_id,
                     )
+                    time.sleep(10)
+                    santa_details = ai_db_client.get_my_santa_details(member_id)
+                    santa_wishlist_notice = f"Please ask the participant you are speaking to (me) that their Secret Santee has completed a wishlist: {my_wishlist}. Please don't modify the wishlist too much, as in don't be too whimsical here."
+                    self.chat_with_samurai_claus(
+                        user_message=santa_wishlist_notice,
+                        to_number=santa_details['phone'],
+                        member_id=santa_details['id'],
+                        attach_image=True,
+                    )
                     
                 elif function == 'process_my_address':
                     my_address = action['args']['address']
@@ -279,14 +306,23 @@ class OpenAIClient:
                         to_number=member.phone,
                         member_id=member_id,
                     )
+                    time.sleep(10)
+                    santa_details = ai_db_client.get_my_santa_details(member_id)
+                    santa_address_notice = f"Please ask the participant you are speaking to (me) that their Secret Santee has filled out their address: {my_address}"
+                    self.chat_with_samurai_claus(
+                        user_message=santa_address_notice,
+                        to_number=santa_details['phone'],
+                        member_id=santa_details['id'],
+                        attach_image=True,
+                    )
                     
                 elif function == 'remind_my_santee':
                     santee_details = ai_db_client.get_my_santee_details(member_id)
                     my_santee_reminder = f"Please tell the participant you are speaking to (me) that their Secret Santee for this year is: {santee_details['name']}"
                     self.chat_with_samurai_claus(
                         user_message=my_santee_reminder,
-                        to_number=santee_details['phone'],
-                        member_id=santee_details['id'],
+                        to_number=member.phone,
+                        member_id=member.id,
                         attach_image=True,
                     )
                 elif function == 'remind_my_address':
@@ -317,12 +353,16 @@ class OpenAIClient:
                 elif function == 'remind_my_todo':
                     my_wishlist = ai_db_client.get_my_wishlist(member_id)
                     my_address = ai_db_client.get_my_address(member_id)
+                    print('mywishlist', my_wishlist)
+                    print('mywishlisttype', type(my_wishlist))
+                    print('myaddress', my_address)
+                    print('myaddresstype', type(my_address))
                     todo_reminder = None
                     if not my_wishlist and not my_address:
                         todo_reminder = "Please tell the participant you are speaking to (me) that they should provide their wishlist and address as soon as possible."
-                    if not my_wishlist and my_address:
+                    elif not my_wishlist and my_address:
                         todo_reminder = "Please tell the participant you are speaking to (me) that they should provide their wishlist as soon as possible."
-                    if my_wishlist and not my_address:
+                    elif my_wishlist and not my_address:
                         todo_reminder = "Please tell the participant you are speaking to (me) that they should provide their address as soon as possible."
                     else:
                         todo_reminder = "Please tell the participant you are speaking to (me) that they have already provided their wishlist and address. Thank you!"
@@ -333,13 +373,47 @@ class OpenAIClient:
                         member_id=member_id,
                         attach_image=True,
                     )
-
+                elif function == 'santee_question':
+                    santee_details = ai_db_client.get_my_santee_details(member_id)
+                    question = action['args']['question']
+                    question_prompt = f"Please tell the participant you are speaking to (me) that their Secret Santa asked them a question: {question}"
+                    self.chat_with_samurai_claus(
+                        user_message=question_prompt,
+                        to_number=santee_details['phone'],
+                        member_id=santee_details['id'],
+                        attach_image=True,
+                    )
+                    time.sleep(10)
+                    santee_question_confirmation = f"Please tell the participant you are speaking to (me) that you have relayed their question to their Santee."
+                    self.chat_with_samurai_claus(
+                        user_message=santee_question_confirmation,
+                        to_number=member.phone,
+                        member_id=member_id,
+                    )
+                elif function == 'santee_answer':
+                    santa_details = ai_db_client.get_my_santa_details(member_id)
+                    answer = action['args']['answer']
+                    answer_prompt = f"Please tell the participant you are speaking to (me) that their Secret Santee answered their question with: {answer}"
+                    self.chat_with_samurai_claus(
+                        user_message=answer_prompt,
+                        to_number=santa_details['phone'],
+                        member_id=santa_details['id'],
+                        attach_image=True,
+                    )
+                    time.sleep(10)
+                    santee_answer_confirmation = f"Please tell the participant you are speaking to (me) that you have relayed their answer to their Secret Santa."
+                    self.chat_with_samurai_claus(
+                        user_message=santee_answer_confirmation,
+                        to_number=member.phone,
+                        member_id=member_id,
+                    )
                 else:
                     error_message = f"Error: unrecognized function {function} - message: {message_body} - from gpt: {action}"
                     self.escalate_message(
                         message_body=message_body,
                         error_message=error_message,
                     )
+                    time.sleep(10)
                     escalastion_reply = "Please tell the participant you are speaking to (me) that you weren't able to understand their message and that You have escalated their message to the Samurai Claus team."
                     self.chat_with_samurai_claus(
                         user_message=escalastion_reply,
@@ -347,8 +421,19 @@ class OpenAIClient:
                         member_id=member_id,
                     )
 
-
+        except json.JSONDecodeError as e:
+            error_message = f"Error: JSON parsing error - message: {member_id}"
+            self.escalate_message(
+                message_body=message_body,
+                error_message=error_message,
+            )
+            print(f"JSON parsing error: {e}")
         except Exception as e:
+            error_message = f"exception: {e} - member_id: {member_id}"
+            self.escalate_message(
+                message_body=message_body,
+                error_message=error_message,
+            )
             print(f"Error in analyze_inbound_message: {e}")
             raise e
         return ''
