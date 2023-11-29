@@ -55,13 +55,13 @@ def create_app():
         print('message_sid', message_sid)
         print('to_number', to_number)
 
-        # from server.message_queue_handler import MessageQueueHandler
-        # MessageQueueHandler.enqueue_received_message(
-        #     from_number=from_number,
-        #     to_number=to_number,
-        #     body=body,
-        #     message_sid=message_sid,
-        # )
+        from server.message_queue_handler import MessageQueueHandler
+        MessageQueueHandler.enqueue_received_message(
+            from_number=from_number,
+            to_number=to_number,
+            body=body,
+            message_sid=message_sid,
+        )
         return Response("Message received", 200)
 
     @app.route('/create-member', methods=['POST'])
