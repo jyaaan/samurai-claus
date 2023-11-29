@@ -220,7 +220,7 @@ class OpenAIClient:
                         message_body=message_body,
                         error_message=action['message'],
                     )
-                    time.sleep(10)
+                    time.sleep(20)
                     escalastion_reply = "Please tell the participant you are speaking to (me) that their message has been escalated to the Samurai Claus team and they will be in touch shortly."
                     self.chat_with_samurai_claus(
                         user_message=escalastion_reply,
@@ -244,7 +244,7 @@ class OpenAIClient:
                             to_number=member.phone,
                             member_id=member_id,
                         )
-                        time.sleep(10)
+                        time.sleep(20)
                         santee_details = ai_db_client.get_my_santee_details(member_id)
                         address_reminder = "Please ask the participant you are speaking to (me) to provide their shipping address when they are able to.  Be polite."
                         self.chat_with_samurai_claus(
@@ -269,7 +269,7 @@ class OpenAIClient:
                             to_number=member.phone,
                             member_id=member_id,
                         )
-                        time.sleep(10)
+                        time.sleep(20)
                         santee_details = ai_db_client.get_my_santee_details(member_id)
                         wishlist_reminder = "Please remind the participant you are speaking to (me) to provide their wishlist items when they are able to. Be polite and encouraging."
                         self.chat_with_samurai_claus(
@@ -287,7 +287,7 @@ class OpenAIClient:
                         to_number=member.phone,
                         member_id=member_id,
                     )
-                    time.sleep(10)
+                    time.sleep(20)
                     santa_details = ai_db_client.get_my_santa_details(member_id)
                     santa_wishlist_notice = f"Please ask the participant you are speaking to (me) that their Secret Santee has completed a wishlist: {my_wishlist}. Please don't modify the wishlist too much, as in don't be too whimsical here."
                     self.chat_with_samurai_claus(
@@ -306,7 +306,7 @@ class OpenAIClient:
                         to_number=member.phone,
                         member_id=member_id,
                     )
-                    time.sleep(10)
+                    time.sleep(20)
                     santa_details = ai_db_client.get_my_santa_details(member_id)
                     santa_address_notice = f"Please ask the participant you are speaking to (me) that their Secret Santee has filled out their address: {my_address}"
                     self.chat_with_samurai_claus(
@@ -383,7 +383,7 @@ class OpenAIClient:
                         member_id=santee_details['id'],
                         attach_image=True,
                     )
-                    time.sleep(10)
+                    time.sleep(20)
                     santee_question_confirmation = f"Please tell the participant you are speaking to (me) that you have relayed their question to their Santee."
                     self.chat_with_samurai_claus(
                         user_message=santee_question_confirmation,
@@ -400,7 +400,7 @@ class OpenAIClient:
                         member_id=santa_details['id'],
                         attach_image=True,
                     )
-                    time.sleep(10)
+                    time.sleep(20)
                     santee_answer_confirmation = f"Please tell the participant you are speaking to (me) that you have relayed their answer to their Secret Santa."
                     self.chat_with_samurai_claus(
                         user_message=santee_answer_confirmation,
@@ -413,7 +413,7 @@ class OpenAIClient:
                         message_body=message_body,
                         error_message=error_message,
                     )
-                    time.sleep(10)
+                    time.sleep(20)
                     escalastion_reply = "Please tell the participant you are speaking to (me) that you weren't able to understand their message and that You have escalated their message to the Samurai Claus team."
                     self.chat_with_samurai_claus(
                         user_message=escalastion_reply,
