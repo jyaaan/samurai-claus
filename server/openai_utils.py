@@ -22,115 +22,6 @@ def get_samurai_claus_profile(member_name):
         "You can tell the member who their Secret Santee (the person who they are giving a gift to) is."
     )
 
-# def get_inbound_analysis_prompt(message, member_id):
-#     member_id_str = f'"member_id": {member_id}'
-#     # Replacing single quotes in the message with an apostrophe
-#     message = message.replace("'", "’")
-#     message_str = f'"message": "{message}"'
-
-#     return(
-#         "Your task is to analyze the inbound messages from the Secret Santa gift exchange and decide on appropriate actions. "
-#         "You must return a non-empty list of dictionaries in JSON format. Each dictionary represents an action to be taken, with keys 'function' and 'args'. "
-#         "Use double quotes for all keys and string values. If any value contains single quotes, replace them with an apostrophe (’). "
-#         "The list should only contain dictionaries and each dictionary must follow the specified structure. "
-#         "The message you are analyzing is from the person you are having this conversation with (me). "
-#         f"The message is surrounded by three tildes: ~~~{message}~~~. "
-#         "Given this message and the context of our ongoing conversation, initialize a list and add dicts representing the actions you want to take. "
-#         "\n\n"
-#         "If the message is a request for the recipient's address, add a dict with the following keys and values: "
-#         f"{{\"function\": \"request_address\", \"args\": {{{member_id_str}}}}}"
-#         "\n\n"
-#         "If the message is a request for the recipient's wishlist, add a dict with the following keys and values: "
-#         f"{{\"function\": \"request_wishlist\", \"args\": {{{member_id_str}}}}}"
-#         "\n\n"
-#         "If the message is the member sending their own wishlist, create a string of the wishlist (which we will refer to as WISHLIST_STRING in the dict) and add a dict with the following keys and values: "
-#         f"{{\"function\": \"process_my_wishlist\", \"args\": {{{member_id_str}, \"wishlist\": WISHLIST_STRING}}}}"
-#         "\n\n"
-#         "If the message is the member sending their own address, create a properly formatted string of the address (which we will refer to as ADDRESS_STRING in the dict) and add a dict with the following keys and values: "
-#         f"{{\"function\": \"process_my_address\", \"args\": {{{member_id_str}, \"address\": ADDRESS_STRING}}}}"
-#         "\n\n"
-#         "If the message is the member asking to be reminded of their santee, add a dict with the following keys and values: "
-#         f"{{\"function\": \"remind_my_santee\", \"args\": {{{member_id_str}}}}}"
-#         "\n\n"
-#         "If the message is the member asking to be reminded of their own address, add a dict with the following keys and values: "
-#         f"{{\"function\": \"remind_my_address\", \"args\": {{{member_id_str}}}}}"
-#         "\n\n"
-#         "If the message is the member asking to be reminded of their own wishlist, add a dict with the following keys and values: "
-#         f"{{\"function\": \"remind_my_wishlist\", \"args\": {{{member_id_str}}}}}"
-#         "\n\n"
-#         "If the message is asking you to ask their Secret Santee a question other than their address or wishlist, add a dict with the following keys and values (QUESTION_SUMMARY is a summary of the question the user is asking their Santee, please remove any identifying information that might reveal the identity of the Secret Santa): "
-#         f"{{\"function\": \"santee_question\", \"args\": {{{member_id_str}, \"question\": QUESTION_SUMMARY}}}}"
-#         "\n\n"
-#         "Please carefully analyze the entire conversation history. Look for any indications that the user's message is a direct response to a specific question previously asked by the user's Secret Santa. Pay attention to phrases or topics that might link back to earlier parts of the conversation. For example, if a previous message asked the user if they like certain kinds of movies and you see a response saying 'I like action movies' or something, this is considered a reply! If you determine the message is a reply to the Secret Santa, summarize the answer while removing any identifying information about the Secret Santa. Then, add a dict with the following keys and values (ANSWER_SUMMARY is a summary of the answer the user is providing, please remove any identifying information that might reveal the identity of the Secret Santa): "
-#         f"{{\"function\": \"santee_answer\", \"args\": {{{member_id_str}, \"answer\": ANSWER_SUMMARY}}}}"
-#         "\n\n"
-#         "If the message is the user asking you what they have left to do, add a dict with the following keys and values: "
-#         f"{{\"function\": \"remind_my_todo\", \"args\": {{{member_id_str}}}}}"
-#         "\n\n"
-#         "For messages that are clearly just casual chat and not related to any specific Secret Santa questions (make sure to check the last few messages to confirm), add a dict with the following keys and values: "
-#         f"{{\"function\": \"chat\", \"args\": {{{member_id_str}}}, {message_str}}}"
-#         "\n\n"
-#         "If the message seems to indicate a problem or is a technical question or concern or if they are trying to address John, the creator of the app, add a dict with the following keys and values (YOUR_ERROR_MESSAGE is a summary of the issue you generate): "
-#         f"{{\"function\": \"escalate\", \"args\": {{{member_id_str}, \"message\": YOUR_ERROR_MESSAGE}}}}"
-#         "\n\n"
-#         "Remember: please only return a list of dicts in JSON format with the keys 'function' and 'args'. You can have multiple actions in the list, but it shouldn't be empty."
-#         "function can only have the values: 'request_address', 'request_wishlist', 'process_my_address', 'process_my_wishlist', 'remind_my_santee', 'remind_my_address', 'remind_my_wishlist', 'chat', 'escalate'"
-#     )
-# def get_inbound_analysis_prompt(message, member_id):
-#     member_id_str = f'"member_id": {member_id}'
-#     # Replacing single quotes in the message with an apostrophe
-#     message = message.replace("'", "’")
-#     message_str = f'"message": "{message}"'
-
-#     return(
-#         "Your task is to analyze the inbound messages from the Secret Santa gift exchange and decide on appropriate actions. "
-#         "You must return a non-empty list of dictionaries in JSON format. Each dictionary represents an action to be taken, with keys 'function' and 'args'. "
-#         "Use double quotes for all keys and string values. If any value contains single quotes, replace them with an apostrophe (’). "
-#         "The list should only contain dictionaries and each dictionary must follow the specified structure. "
-#         "The message you are analyzing is from the person you are having this conversation with (me). "
-#         f"The message is surrounded by three tildes: ~~~{message}~~~. "
-#         "Given this message and the context of our ongoing conversation, initialize a list and add dicts representing the actions you want to take. "
-#         "\n\n"
-#         "If the message is a request for the recipient's address, add a dict with the following keys and values: "
-#         f"{{\"function\": \"request_address\", \"args\": {{{member_id_str}}}}}"
-#         "\n\n"
-#         "If the message is a request for the recipient's wishlist, add a dict with the following keys and values: "
-#         f"{{\"function\": \"request_wishlist\", \"args\": {{{member_id_str}}}}}"
-#         "\n\n"
-#         "If the message is the member sending their own wishlist, create a string of the wishlist (which we will refer to as WISHLIST_STRING in the dict) and add a dict with the following keys and values: "
-#         f"{{\"function\": \"process_my_wishlist\", \"args\": {{{member_id_str}, \"wishlist\": WISHLIST_STRING}}}}"
-#         "\n\n"
-#         "If the message is the member sending their own address, create a properly formatted string of the address (which we will refer to as ADDRESS_STRING in the dict) and add a dict with the following keys and values: "
-#         f"{{\"function\": \"process_my_address\", \"args\": {{{member_id_str}, \"address\": ADDRESS_STRING}}}}"
-#         "\n\n"
-#         "If the message is the member asking to be reminded of their santee, add a dict with the following keys and values: "
-#         f"{{\"function\": \"remind_my_santee\", \"args\": {{{member_id_str}}}}}"
-#         "\n\n"
-#         "If the message is the member asking to be reminded of their own address, add a dict with the following keys and values: "
-#         f"{{\"function\": \"remind_my_address\", \"args\": {{{member_id_str}}}}}"
-#         "\n\n"
-#         "If the message is the member asking to be reminded of their own wishlist, add a dict with the following keys and values: "
-#         f"{{\"function\": \"remind_my_wishlist\", \"args\": {{{member_id_str}}}}}"
-#         "\n\n"
-#         "If the message is asking you to ask their Secret Santee a question other than their address or wishlist, add a dict with the following keys and values (QUESTION_SUMMARY is a summary of the question the user is asking their Santee, please remove any identifying information that might reveal the identity of the Secret Santa): "
-#         f"{{\"function\": \"santee_question\", \"args\": {{{member_id_str}, \"question\": QUESTION_SUMMARY}}}}"
-#         "\n\n"
-#         "Please carefully analyze the entire conversation history. Look for any indications that the user's message is a direct response to a specific question previously asked by the user's Secret Santa. Pay attention to phrases or topics that might link back to earlier parts of the conversation. For example, if a previous message asked the user if they like certain kinds of movies and you see a response saying 'I like action movies' or something, this is considered a reply! If you determine the message is a reply to the Secret Santa, summarize the answer while removing any identifying information about the Secret Santa. Then, add a dict with the following keys and values (ANSWER_SUMMARY is a summary of the answer the user is providing, please remove any identifying information that might reveal the identity of the Secret Santa): "
-#         f"{{\"function\": \"santee_answer\", \"args\": {{{member_id_str}, \"answer\": ANSWER_SUMMARY}}}}"
-#         "\n\n"
-#         "If the message is the user asking you what they have left to do, add a dict with the following keys and values: "
-#         f"{{\"function\": \"remind_my_todo\", \"args\": {{{member_id_str}}}}}"
-#         "\n\n"
-#         "For messages that are clearly just casual chat and not related to any specific Secret Santa questions (make sure to check the last few messages to confirm), add a dict with the following keys and values: "
-#         f"{{\"function\": \"chat\", \"args\": {{{member_id_str}}}, {message_str}}}"
-#         "\n\n"
-#         "If the message seems to indicate a problem or is a technical question or concern or if they are trying to address John, the creator of the app, add a dict with the following keys and values (YOUR_ERROR_MESSAGE is a summary of the issue you generate): "
-#         f"{{\"function\": \"escalate\", \"args\": {{{member_id_str}, \"message\": YOUR_ERROR_MESSAGE}}}}"
-#         "\n\n"
-#         "IMPORTANT: Ensure the output is always a list of dictionaries in JSON format. Each dictionary should clearly represent an action based on the message analysis. "
-#         "The list cannot be empty, and should accurately reflect the necessary actions based on the conversation context and the message provided."
-#         "IMPORTANT: Ensure the output is always a list of dictionaries in JSON format. Each dictionary should clearly represent an action based on the message analysis. This is here twice since you keep forgetting!"
-#     )
 def get_inbound_analysis_prompt(message, member_id):
     member_id_str = f'"member_id": {member_id}'
     # Replacing single quotes in the message with an apostrophe
@@ -193,11 +84,9 @@ def get_inbound_analysis_prompt(message, member_id):
 
 def get_welcome_message_prompt(secret_santee_name):
     return (
-        "Aloha and Konnichiwa! Welcome to our festive Secret Santa event, where the spirit of Bushido meets the joy of the holiday season. I am Samurai Claus, your guide in this journey of gift-giving and merry cheer.\n\n"
-        f"Your Secret Santee this year is {secret_santee_name}. As the lanterns light our path, I kindly ask you to share your wishlist and shipping address with me. This will help in crafting a holiday experience as unique as the falling snowflakes. Rest assured, I have also requested the same from your Santee and will inform you posthaste once their details are afloat like leaves in the autumn breeze.\n\n"
-        "Our exchange is more than gifts; it's a celebration of connections. Whether you seek guidance in choosing a gift, wish to concoct a festive dish, or desire a holiday haiku, I stand ready. My wisdom is your beacon, and my cheer, your warmth. Should you face any whirlwinds, fear not, for John, the creator of this realm, is but a message away through me.\n\n"
-        "Let us embark on this journey with the honor of a samurai and the heart of Santa. May our exchange be filled with the 'Merry Bushido' spirit, weaving the 'Leis of Aloha' into our holiday tapestry. Your participation illuminates our celebration like the brightest star atop the holiday tree. Together, let's make this season a symphony of joyous giving and heartfelt gratitude."
-        "\n\n"
-        "Note: responses generally take 2 minutes but can take longer depending on the number of requests! John will review any issues daily."
-        "Some commands to get you started: 'my address is _____', 'my wishlist is _____', 'what is my santee's address?', 'what is my santee's wishlist?', 'what do I have left to do?', 'what is my santee's name?'"
+        f"Aloha and Konnichiwa! I am Samurai Claus, your guide in our Secret Santa event. Your Secret Santee this year is {secret_santee_name}. Please share your wishlist and shipping address, and I'll do the same with your Santee.\n\n"
+        "Need help choosing a gift, crafting a festive dish, or writing a holiday haiku? I'm here to assist. For any concerns, John, the creator of this realm, is just a message away.\n\n"
+        "Let's celebrate with the honor of a samurai and the heart of Santa, weaving the 'Leis of Aloha' into our holiday tapestry. May our exchange be a symphony of joyous giving and heartfelt gratitude.\n\n"
+        "Note: Responses may take about 2 minutes. John will review any issues daily. Here are some commands to get you started: 'my address is _____', 'my wishlist is _____', 'what is my santee's address?', 'what is my santee's wishlist?', 'what do I have left to do?', 'what is my santee's name?'"
     )
+
