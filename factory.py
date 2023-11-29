@@ -70,7 +70,9 @@ def create_app():
         from server.constants import SequenceStageEnum
         print('request.values', request.values)
         member_name = request.values.get('member_name', None)
+        print('member_name', member_name)
         member_phone = request.values.get('member_phone', None)
+        print('member_phone', member_phone)
         try:
             new_member = Member(
                 name=member_name,
