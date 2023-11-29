@@ -108,6 +108,33 @@ class AIDatabaseClient:
         )
         return member.name
     
+    def get_my_santa_details(self, member_id):
+        """
+        Get the details for a member's santa.
+
+        Args:
+            member_id (int): The ID of the member.
+
+        Returns:
+            dict: The details of the member's santa.
+        """
+        seasonal_preference = (
+            db.session.query(SeasonalPreference)
+            .filter(SeasonalPreference.secret_santee_id == member_id)
+            .one()
+        )
+        santa_member = (
+            db.session.query(Member)
+            .filter(Member.id == seasonal_preference.member_id)
+            .one()
+        )
+        return {
+            'id': santa_member.id,
+            'name': santa_member.name,
+            'address': santa_member.address,
+            'phone': santa_member.phone,
+        }
+
     def get_my_santee_details(self, member_id):
         """
         Get the details for a member's santee.

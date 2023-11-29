@@ -11,6 +11,7 @@ def process_messages():
     with app.app_context():
         MessageQueueHandler.get_message_status()
         MessageQueueHandler.process_message_queue()
+        MessageQueueHandler.start_sequences()
 
 if __name__ == '__main__':
     scheduler.start()
