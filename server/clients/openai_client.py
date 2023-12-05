@@ -289,7 +289,7 @@ class OpenAIClient:
                     )
                     time.sleep(20)
                     santa_details = ai_db_client.get_my_santa_details(member_id)
-                    santa_wishlist_notice = f"Please ask the participant you are speaking to (me) that their Secret Santee has completed a wishlist: {my_wishlist}. Please don't modify the wishlist too much, as in don't be too whimsical here."
+                    santa_wishlist_notice = f"Please ask the participant you are speaking to (me) that their Secret Santee has completed a wishlist: {my_wishlist}. Please don't modify the wishlist too much, as in don't be too whimsical here. Please preserve links!"
                     self.chat_with_samurai_claus(
                         user_message=santa_wishlist_notice,
                         to_number=santa_details['phone'],
